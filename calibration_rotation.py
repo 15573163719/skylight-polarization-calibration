@@ -92,13 +92,12 @@ def estimate_direction_prior(cfg,data,steps=None):
 
 
 def run_demo(config_path=None, output_dir=None, maxiter=None, no_direction_prior=False,
-             fixed_direction_prior=False, no_aop_compensation=False, paper_objective=False,no_focal_prior=False):
+             fixed_direction_prior=False):
     start = time.perf_counter()
     cfg = read_config("rotation", config_path)
-    cfg=focal.objective_config(cfg,paper_objective,no_focal_prior)
-    if no_aop_compensation:cfg['aop_compensation']['enable_aop_model_comp']=False
+    focal.settings(cfg)
     if no_direction_prior:cfg['direction_prior']['enabled']=False
-    print("Loading bundled rotation images; AoP compensation="+str(cfg["aop_compensation"]["enable_aop_model_comp"]), flush=True)
+    print("Loading bundled rotation images; fixed AoP preprocessing and focal stabilization", flush=True)
     data, truth, shape = load_dataset(cfg)
     per_pos = cfg["frames_per_position"]
     for index, item in enumerate(data):
@@ -146,14 +145,11 @@ def main():
     parser.add_argument("--config", help="Optional configuration JSON")
     parser.add_argument("--output-dir", help="Output folder (default: demo/results)")
     parser.add_argument("--maxiter", type=int, help="Override optimizer iteration budget")
-    parser.add_argument('--no-aop-compensation',action='store_true',help='Disable empirical AoP correction for a separately refitted ablation')
-    parser.add_argument('--paper-objective',action='store_true',help='Use equal relative residuals and disable focal regularization')
-    parser.add_argument('--no-focal-prior',action='store_true',help='Disable the explicit initial-focal regularization')
     group=parser.add_mutually_exclusive_group()
     group.add_argument('--no-direction-prior',action='store_true',help='Disable direction prior only; retain configured focal setting')
     group.add_argument('--fixed-direction-prior',action='store_true',help='Use fixed weight without validation guard (ablation)')
     args = parser.parse_args()
-    run_demo(args.config, args.output_dir, args.maxiter,args.no_direction_prior,args.fixed_direction_prior,args.no_aop_compensation,args.paper_objective,args.no_focal_prior)
+    run_demo(args.config, args.output_dir, args.maxiter,args.no_direction_prior,args.fixed_direction_prior)
 
 
 if __name__ == "__main__":

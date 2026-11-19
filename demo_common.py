@@ -26,6 +26,9 @@ def read_config(mode, config_path=None):
         raise ValueError(f"Expected {mode} configuration: {path}")
     if "nominal_intrinsics_px" in cfg:
         raise ValueError("Obsolete separate direction-prior input; remove nominal_intrinsics_px and use initial_intrinsics_px")
+    if ('enable_aop_model_comp' in cfg.get('aop_compensation', {})
+            or 'enabled' in cfg.get('focal_regularization', {})):
+        raise ValueError('AoP preprocessing and focal stabilization are fixed stages; remove legacy enable/disable fields')
     cfg["config_path"] = path
     cfg["manifest_path"] = (path.parent / cfg["manifest"]).resolve()
     cfg["calibration_path"] = (path.parent / cfg["sensor_calibration"]).resolve()
@@ -116,7 +119,7 @@ def load_dataset(cfg, limit=None):
         zenith = 90-solar.get_altitude(latitude, longitude, timestamp)
         data.append({"rows": rows.astype(float), "cols": cols.astype(float),
                      "AoP": aop[yi, xi], "Q": stokes[0, yi, xi], "U": stokes[1, yi, xi],
-                     "CompConfig": cfg.get("aop_compensation", {}), "Cpl": transform, "radius": radius,
+                     "CompConfig": cfg["aop_compensation"], "Cpl": transform, "radius": radius,
                      "SunAz": np.radians(azimuth), "SunZen": np.radians(zenith),
                      "reference_heading_deg": record["reference_heading_deg"],
                      "timestamp_utc": timestamp.isoformat(), "image": record["image"],
@@ -142,11 +145,9 @@ def compute_evectors(f, u0, v0, item, model_id=0):
     if f <= 0 or not np.any(mask):
         return np.empty((3, 0))
     x, y, aop = x[mask], y[mask], item["AoP"][mask]
-    comp=item.get('CompConfig',{})
-    if comp.get('enable_aop_model_comp',False):
-        if 'Q' not in item or 'U' not in item:
-            raise ValueError('Enabled AoP compensation requires Q/U samples')
-        aop=correct_roi_aop(item['Q'][mask],item['U'][mask],comp)
+    if 'Q' not in item or 'U' not in item:
+        raise ValueError('AoP preprocessing requires Q/U samples')
+    aop=correct_roi_aop(item['Q'][mask],item['U'][mask],item['CompConfig'])
     alpha, gamma = np.arctan2(x, y), np.arctan(np.hypot(x, y)/f)
     phi = compute_phi(alpha, gamma, aop, model_id)
     ca, sa, cg, sg, cp, sp = (np.cos(alpha), np.sin(alpha), np.cos(gamma),
@@ -203,7 +204,7 @@ def write_outputs(mode, output_dir, cfg, data, params_before, params_after, summ
     truth = np.array([d["reference_heading_deg"] for d in data])
     summary.update(mode=mode, frame_count=len(data), initial_intrinsics_px=list(map(float, params_before)),
                    calibrated_intrinsics_px=list(map(float, params_after)),
-                   extra_aop_compensation=bool(cfg.get('aop_compensation',{}).get('enable_aop_model_comp',False)),
+                   extra_aop_compensation=True,
                    before=absolute_metrics(before, truth, cfg), after=absolute_metrics(after, truth, cfg),
                    config_sha256=hashlib.sha256(cfg["config_path"].read_bytes()).hexdigest(),
                    sensor_calibration_sha256=hashlib.sha256(cfg["calibration_path"].read_bytes()).hexdigest(),

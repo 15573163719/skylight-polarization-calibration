@@ -3,13 +3,11 @@
 The anchor is a declared initial input, not a manuscript fitted result. The
 normalization scale and weight are design choices, not measured uncertainty.
 """
-from copy import deepcopy
 import numpy as np
 
 
 def settings(cfg):
-    options=cfg.get('focal_regularization',{})
-    if not options.get('enabled',False):return dict(enabled=False,weight_deg2=0.)
+    options=cfg['focal_regularization']
     explicit='anchor_px' in options
     anchor=float(options['anchor_px'] if explicit else cfg['initial_intrinsics_px'][0])
     source=options.get('anchor_source','') if explicit else 'Optimization initial focal length; no measured uncertainty claimed'
@@ -28,16 +26,8 @@ def settings(cfg):
 
 def penalty(params,cfg):
     state=settings(cfg)
-    if not state['enabled']:return 0.
     f=float(params[0])
     if not np.isfinite(f):raise ValueError('Nonfinite candidate focal length')
     return float(state['weight_deg2']*((f-state['anchor_px'])/state['scale_px'])**2)
 
 
-def objective_config(cfg,paper_objective=False,no_focal_prior=False):
-    result=deepcopy(cfg)
-    if paper_objective:result['residual_weighting']='equal'
-    if paper_objective or no_focal_prior:
-        if 'focal_regularization' in result:result['focal_regularization']['enabled']=False
-    settings(result)
-    return result

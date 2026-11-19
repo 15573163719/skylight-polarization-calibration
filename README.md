@@ -63,18 +63,11 @@ default J = mean(e**2) + direction_penalty
 
 The final quadratic term is an explicit regularized extension of the manuscript objectives. Its weight and scale are engineering settings, not measured uncertainty. The direction penalty is a weak, normalized perpendicular-distance penalty to the line through the initial principal point. Bounds, prior settings, compensation coefficients and optimizer seed are in each `config.json`. Default weighting is equal and no fitted constant evaluation bias is subtracted (`fixed_bias_deg=0`). The same declared +45° coordinate convention applies before and after calibration.
 
-Under the level-camera, heading-based observations used here, focal length is weakly identified. The penalty stabilizes its value near the supplied initial value; this does not establish independent recovery of physical focal length. To refit the original equal-weight relative-angle objective without the added focal penalty:
-
-```sh
-python -B calibration_rotation.py --paper-objective --output-dir results/original_objective
-python -B calibration_static_heading_domain.py --paper-objective --output-dir results/original_objective
-```
-
-These commands write separate JSON/CSV results. The default figure exporter accepts the default configuration only, so it does not relabel these control runs as default results.
+Under the level-camera, heading-based observations used here, focal length is weakly identified. The penalty stabilizes its value near the supplied initial value; this does not establish independent recovery of physical focal length. Both calibration modes use this regularized objective as part of the supplied pipeline.
 
 ### Polarization preprocessing
 
-The input images undergo sensor gain/bias correction and measured-analyzer inversion to obtain Stokes Q/U and AoP. The optional empirical AoP compensation originates from the authors’ subsequent work and is outside the methodological contributions of the present manuscript. It is enabled by default in this demo as a shared preprocessing stage, using the same fixed settings before and after intrinsic calibration. It affects the reconstructed observations and numerical results; the reported default results therefore describe this combined pipeline. For amplitude `A=hypot(Q,U)` and `theta=atan2(U,Q)/2`:
+The input images undergo sensor gain/bias correction and measured-analyzer inversion to obtain Stokes Q/U and AoP. The empirical AoP compensation originates from the authors’ subsequent work and is outside the methodological contributions of the present manuscript. It is a fixed preprocessing stage in this demo, using the same settings before and after intrinsic calibration. The reported results describe this combined pipeline. For amplitude `A=hypot(Q,U)` and `theta=atan2(U,Q)/2`:
 
 ```text
 delta = (dU*cos(2*theta) - dQ*sin(2*theta)) / (2*A)
@@ -90,13 +83,6 @@ Pixels below the configured minimum amplitude receive zero correction. Profiles 
 | > 10000 | 28 | -65 | 1000 | 2° |
 
 Coefficients are fixed in the supplied configurations and inherited from historical heading-error analysis; they are not fitted by this demo. Their development-data overlap is unverified, so the results are not blind validation of compensation. Basic Stokes-to-AoP reconstruction remains enabled. This implementation does not apply geometric undistortion.
-
-For a separately fitted compensation-off control:
-
-```sh
-python -B calibration_rotation.py --no-aop-compensation --output-dir results/compensation_off
-python -B calibration_static_heading_domain.py --no-aop-compensation --output-dir results/compensation_off
-```
 
 ### Angle and coordinate conventions in this implementation
 

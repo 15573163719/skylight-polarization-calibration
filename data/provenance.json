@@ -144,7 +144,7 @@
     "evaluation": "No -0.19 degree fixed-bias subtraction in either method",
     "target": "40% heading RMSE reduction in each selected example; rotation adjacent residual halving not achieved",
     "blind_validation": false,
-    "focal": "Explicit soft stabilization around author-reported camera-supplied initial1300 px; engineering weight0.02degree², scale130px; original equal objective retained as no-focal control.",
+    "focal": "Both modes include soft stabilization around the author-reported camera-supplied initial 1300 px; engineering weight 0.02 degree squared, scale 130 px; a regularized extension of the manuscript objective.",
     "reference": "Both modes use matched INS; no exact mechanical-angle or independent calibration-set validation claim."
   },
   "initial_focal_provenance": {

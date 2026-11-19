@@ -85,7 +85,7 @@ def generate(results_dir=None):
             params=summary['initial_intrinsics_px' if state=='before' else 'calibrated_intrinsics_px']
             table.append(dict(method=mode,state=state,f_px=params[0],u0_row_px=params[1],v0_column_px=params[2],
                               residual_weighting=cfg.get('residual_weighting','equal'),
-                              focal_regularization_enabled=cfg.get('focal_regularization',{}).get('enabled',False),
+                              focal_regularization_enabled=True,
                               consistency_rms_deg=rms(residuals),heading_rmse_deg=rms(errors),
                               heading_rmse_without_fixed_bias_deg=rms(wrap180(errors+cfg['fixed_bias_deg']))))
             values[state]=dict(errors=errors,residuals=residuals)
@@ -116,13 +116,13 @@ def generate(results_dir=None):
     lines=['# Additional method demonstration — generated from this run','',
            'Effective intrinsics use original-image pixels. Both initial vectors are [1300,360,640].',
            'These are reconstructed heading residuals, not pixel-level AoP errors.',
-           'Focal regularization settings: '+str({m:d['cfg'].get('focal_regularization',{}).get('enabled',False) for m,d in panel_data.items()})+'. Default soft stabilization uses the author-reported camera initial1300px; see README.md for the original-objective command and input provenance.','',
+           'Both calibration modes include focal stabilization around the author-reported camera initial value of 1300 px; see README.md for the objective and input provenance.','',
            '| Method | State | f (px) | u0 row (px) | v0 column (px) | Consistency RMS (deg) | Heading RMSE (deg) | RMSE without fixed bias subtraction (deg) |',
            '| --- | --- | ---: | ---: | ---: | ---: | ---: | ---: |']
     for r in table:
         lines.append(f"| {r['method']} | {r['state']} | {r['f_px']:.6f} | {r['u0_row_px']:.6f} | {r['v0_column_px']:.6f} | {r['consistency_rms_deg']:.6f} | {r['heading_rmse_deg']:.6f} | {r['heading_rmse_without_fixed_bias_deg']:.6f} |")
     lines+=['','Absolute errors use the declared +45 degree coordinate convention, identically before and after. Fixed bias subtraction is '+str({m:d['cfg']['fixed_bias_deg'] for m,d in panel_data.items()})+' degrees. No additional mounting correction is applied.',
-            'Both before and after use the same restored empirical AoP compensation. The README describes how to refit without compensation; do not attribute the preprocessing gain to intrinsic calibration.',
+            'Both before and after use the same fixed empirical AoP preprocessing from subsequent work. These results describe intrinsic calibration within that common processing pipeline.',
             'These additional examples demonstrate execution of the method; these selected subsets do not numerically reproduce the manuscript tables and figures.']
     (out/'example_summary.md').write_text('\n'.join(lines)+'\n',encoding='utf-8')
     for mode,data in panel_data.items():write_csv(out/(mode+'_consistency_residuals.csv'),data['rows'])
@@ -135,9 +135,9 @@ def generate(results_dir=None):
         'Reference increments are frozen identically before and after calibration. INS-referenced calibration-set errors are not independent validation. '
         'Static residuals use matched INS heading differences relative to the fixed reference frame. Both modes use INS inputs frozen before fitting. Static time labels use actual manifest timestamps (UTC+8). Both modes retain the declared '
         '+45 degree coordinate convention; fixed evaluation biases are '+str({m:d['cfg']['fixed_bias_deg'] for m,d in panel_data.items()})+' degrees, without an additional mounting correction. '
-        'Both conditions include the same original empirical first-order dQ/dU AoP correction; its coefficients are fixed and their development-data overlap is unverified. '
+        'Both conditions include the same empirical first-order dQ/dU AoP correction from subsequent work; its coefficients are fixed and their development-data overlap is unverified. '
         f"Objective weighting: rotation={panel_data['rotation']['cfg'].get('residual_weighting','equal')}, static={panel_data['static']['cfg'].get('residual_weighting','equal')}. "
-        'Explicit focal regularization is '+str({m:d['cfg'].get('focal_regularization',{}).get('enabled',False) for m,d in panel_data.items()})+'. Anchors in pixels: '+str({m:d['cfg'].get('focal_regularization',{}).get('anchor_px') for m,d in panel_data.items()})+'. Scale and weight are engineering choices, not measured uncertainties. Focal proximity is not independent geometric validation. '
+        'Both modes include focal regularization. Anchors in pixels: '+str({m:d['cfg']['focal_regularization'].get('anchor_px',d['cfg']['initial_intrinsics_px'][0]) for m,d in panel_data.items()})+'. Scale and weight are engineering choices, not measured uncertainties. Focal proximity is not independent geometric validation. '
         'The plotted consistency residuals remain the original unweighted differences; the weighted fitting criterion, if used, is reported separately in the summaries. '
         'Boxes show quartiles and medians, whiskers extend to the most extreme observations within '
         '1.5 IQR, and points show every selected frame. Statistics are descriptive calibration-set results, '

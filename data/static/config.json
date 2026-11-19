@@ -80,7 +80,6 @@
   "example_role": "additional_method_demonstration",
   "fixed_bias_source": "No fixed evaluation bias subtraction; the declared +45 degree coordinate convention remains.",
   "aop_compensation": {
-    "enable_aop_model_comp": true,
     "profile_mode": "auto",
     "dS1_scale": 1.0,
     "dS2_scale": 1.0,
@@ -113,7 +112,6 @@
   },
   "residual_weighting": "equal",
   "focal_regularization": {
-    "enabled": true,
     "anchor_px": 1300.0,
     "anchor_source": "Author reports 1300 px as the camera-supplied initial; no independent geometric-calibration record or uncertainty verified.",
     "weight_deg2": 0.02,

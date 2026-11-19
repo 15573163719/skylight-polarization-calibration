@@ -2,7 +2,7 @@
 
 Equal independent per-frame noise implies correlated differences. This optional
 update uses 2*e.T@inv(D@D.T)@e / len(e), with the factor 2 retaining the marginal
-difference-variance scale. The equal-weight paper objective remains available.
+difference-variance scale. The supplied pipeline uses equal residual weights.
 """
 from functools import lru_cache
 import numpy as np

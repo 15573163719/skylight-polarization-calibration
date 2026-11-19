@@ -1,0 +1,129 @@
+{
+  "mode": "rotation",
+  "manifest": "frames.csv",
+  "sensor_calibration": "../skybd25.mat",
+  "location": {
+    "longitude": 112.99259,
+    "latitude": 28.22026,
+    "altitude": 61.66
+  },
+  "analyzer_angles_rad": [
+    0.0,
+    -0.78124037,
+    -2.35115565,
+    -1.56594173
+  ],
+  "sensor_to_platform": [
+    [
+      1.0,
+      0.0,
+      0.0
+    ],
+    [
+      0.0,
+      -1.0,
+      0.0
+    ],
+    [
+      0.0,
+      0.0,
+      -1.0
+    ]
+  ],
+  "roll_deg": 0.0,
+  "pitch_deg": 0.0,
+  "mask_radius_px": 80,
+  "sample_step": 1,
+  "initial_intrinsics_px": [
+    1300.0,
+    360.0,
+    640.0
+  ],
+  "bounds_px": [
+    [
+      800.0,
+      2000.0
+    ],
+    [
+      280.0,
+      440.0
+    ],
+    [
+      560.0,
+      720.0
+    ]
+  ],
+  "model_id": 1,
+  "fixed_bias_deg": 0.0,
+  "evaluation_angle_offset_deg": 45.0,
+  "kb_bias_scale": 1.0,
+  "rotation_step_deg": 27.692307692307693,
+  "rotation_reference_source": "Adjacent axial differences of matched INS headings in frames.csv, fixed before and after fitting. Nominal 360/13 remains a separate command-schedule control. Not independently verified exact mechanical truth.",
+  "prior_policy": "fixed",
+  "frames_per_position": 1,
+  "optimizer": {
+    "method": "differential_evolution",
+    "seed": 20261114,
+    "maxiter": 800,
+    "popsize": 15,
+    "tol": 0.0001,
+    "atol": 0.0,
+    "polish": false
+  },
+  "direction_prior": {
+    "enabled": true,
+    "weight_deg2": 0.02,
+    "scale_px": 80.0,
+    "scan_step_deg": 1.0,
+    "min_correlation": 0.2,
+    "min_pairs": 4
+  },
+  "example_role": "additional_method_demonstration",
+  "fixed_bias_source": "No fixed evaluation bias subtraction; the declared +45 degree coordinate convention remains.",
+  "aop_compensation": {
+    "enable_aop_model_comp": true,
+    "profile_mode": "auto",
+    "dS1_scale": 1.0,
+    "dS2_scale": 1.0,
+    "normal": {
+      "name": "normal",
+      "dQ": 57.84,
+      "dU": -132.24,
+      "min_A": 300.0,
+      "max_delta_deg": 12.0,
+      "gain": 1.0
+    },
+    "midday": {
+      "name": "midday_low_A",
+      "dQ": 120.0,
+      "dU": -125.0,
+      "min_A": 150.0,
+      "max_delta_deg": 18.0,
+      "gain": 1.0,
+      "A_max": 1600.0
+    },
+    "evening": {
+      "name": "evening_high_A",
+      "dQ": 28.0,
+      "dU": -65.0,
+      "min_A": 1000.0,
+      "max_delta_deg": 2.0,
+      "gain": 1.0,
+      "A_min": 10000.0
+    }
+  },
+  "residual_weighting": "equal",
+  "rotation_reference_kind": "matched_ins",
+  "focal_regularization": {
+    "enabled": true,
+    "anchor_px": 1300.0,
+    "anchor_source": "Author reports 1300 px as the camera-supplied initial; no independent geometric-calibration record or uncertainty verified.",
+    "weight_deg2": 0.02,
+    "scale_fraction": 0.1,
+    "rationale": "Declared engineering stabilization around the camera-supplied initial; scale/weight are design choices, not measured uncertainty. Not a manuscript fitted-value target."
+  },
+  "heading_reference_kind": "matched_ins",
+  "reference_usage": "Adjacent position INS differences",
+  "reference_independence": "INS is external to optical reconstruction; calibration-set INS metrics are not independent validation.",
+  "initial_focal_source": "Author-confirmed camera-supplied initial of 1300 px; not independently verified geometric calibration."
+}
